@@ -1,7 +1,9 @@
 from account import Account
+from client import Client
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from random import randint
+from cryptography.fernet import Fernet
 
 while True:
 
@@ -20,8 +22,13 @@ while True:
             cpf = input()
             print("Please insert your RG")
             rg = input()
-            print("Please insert a passcode")
-            passcode = input()
+            print("Please insert a password")
+            password = input()
+
+            key = Fernet.generate_key()
+            fernet = Fernet(key)
+            passcode = fernet.encrypt(password.encode())
+
             id = randint(000000, 999999)
 
             engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
@@ -33,7 +40,7 @@ while True:
                 )
                 conn.commit()
 
-            acc = Account(passcode, fullname, email, phone, cpf, rg)
+            acc = Client(passcode, fullname, email, phone, cpf, rg)
             continue
         case 3:
             break
