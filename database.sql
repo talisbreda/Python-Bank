@@ -2,18 +2,18 @@ create database trabalho;
 use trabalho;
 
 create table client (
-	idClient int not null primary key auto_increment,
-    passcode varchar(45) not null,
+	idClient bigint not null primary key auto_increment,
+    passcode varchar(255) not null,
     fullname varchar(255) not null,
     email varchar(255) not null,
     phone varchar(30) not null,
-    cpf int not null,
-    rg int not null
+    cpf bigint not null,
+    rg bigint not null
 );
 
 create table account (
 	idAccount int not null primary key auto_increment,
-    holder int not null,
+    holder bigint not null,
     accNumber int not null,
     agency int not null,
     accType int not null,
@@ -22,3 +22,4 @@ create table account (
 
 select * from client;
 select * from account;
+delete from client;
