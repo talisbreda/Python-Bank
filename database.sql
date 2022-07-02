@@ -20,4 +20,5 @@ create table account (
     foreign key (holder) references client (idClient)
 );
 
-select
+select * from client;
+select * from account;

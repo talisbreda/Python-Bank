@@ -1,17 +1,9 @@
 class Account():
 
 
-    def __init__(self, passcode, name, email, phone, cpf, rg) -> None:
-        self.passcode = passcode
-        self.name = name
-        self.email = email
-        self.phone = phone
-        self.cpf = cpf
-        self.rg = rg
+    def __init__(self, new) -> None:
         self.balance = 0
-
-        
-    
+ 
 
     def deposit(self):
         print("Insert the value of the deposit")
