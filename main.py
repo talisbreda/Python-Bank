@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from random import randint
 from cryptography.fernet import Fernet
+<<<<<<< HEAD
 
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 key = Fernet.generate_key()
@@ -39,6 +40,8 @@ def accessUser(email):
     
     print(result.all())
 
+=======
+>>>>>>> c5f44e4d63bdd48c79ed8fdd53c8b3b7f9c6b0b8
 
 while True:
 
@@ -65,9 +68,29 @@ while True:
             print("Please insert your RG")
             rg = input()
             print("Please insert a password")
+<<<<<<< HEAD
             passcode = fernet.encrypt(input().encode())
             
             createNewClient()
+=======
+            password = input()
+
+            key = Fernet.generate_key()
+            fernet = Fernet(key)
+            passcode = fernet.encrypt(password.encode())
+
+            id = randint(000000, 999999)
+
+            engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
+
+            with engine.connect() as conn:
+                conn.execute(
+                    text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
+                    [{"id": id, "passcode": passcode, "fullname": fullname, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
+                )
+                conn.commit()
+
+>>>>>>> c5f44e4d63bdd48c79ed8fdd53c8b3b7f9c6b0b8
             acc = Client(passcode, fullname, email, phone, cpf, rg)
             continue
         case 3:

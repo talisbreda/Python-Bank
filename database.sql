@@ -22,4 +22,3 @@ create table account (
 
 select * from client;
 select * from account;
-delete from client;
