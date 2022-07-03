@@ -1,14 +1,14 @@
 class Client():
-    def __init__(self, passcode, name, email, phone, cpf, rg) -> None:
-        self.passcode = passcode
-        self.name = name
-        self.email = email
-        self.phone = phone
-        self.cpf = cpf
-        self.rg = rg
-    
-    def getPasscode(self):
-        print(self.passcode)
+    def __init__(self, name, email, phone, cpf, rg, new) -> None:
+        if new:
+            self.name = name
+            self.email = email
+            self.phone = phone
+            self.cpf = cpf
+            self.rg = rg
+        else:
+            pass
+
     def getName(self):
         print(self.name)
     def getEmail(self):
@@ -20,8 +20,6 @@ class Client():
     def getRG(self):
         print(self.rg)
     
-    def setPasscode(self, passcode):
-        self.passcode = passcode
     def setName(self, name):
         self.name = name
     def setEmail(self, email):

@@ -6,12 +6,8 @@ from random import randint
 from cryptography.fernet import Fernet
 
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
-
-def encryptPassword(password):
-    key = Fernet.generate_key()
-    fernet = Fernet(key)
-    passcode = fernet.encrypt(password.encode())
-    return passcode
+key = Fernet.generate_key()
+fernet = Fernet(key)
 
 def createNewClient():
 
@@ -29,6 +25,18 @@ def authenticate(email, password):
             [{"email": email}]
         )
         conn.commit()
+    passcode = bytes(result.scalar(), 'UTF-8')
+    decPasscode = fernet.decrypt(passcode).decode()
+    if decPasscode == password:
+        accessUser(email)
+
+def accessUser(email):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT fullname, phone, cpf, rg FROM client WHERE email = :email")
+            [{"email": email}])
+        conn.commit()
+    
     print(result.all())
 
 
@@ -57,7 +65,7 @@ while True:
             print("Please insert your RG")
             rg = input()
             print("Please insert a password")
-            passcode = encryptPassword(input())
+            passcode = fernet.encrypt(input().encode())
             
             createNewClient()
             acc = Client(passcode, fullname, email, phone, cpf, rg)
@@ -66,21 +74,21 @@ while True:
             break
 
 
-    # while True:
+    while True:
 
-    #     print("Type 1 to deposit, 2 to withdraw, 3 to transfer, 4 to leave")
-    #     n = int(input())
+        print("Type 1 to deposit, 2 to withdraw, 3 to transfer, 4 to leave")
+        n = int(input())
 
-    #     match n:
-    #         case 1:
-    #             acc.deposit()
-    #             continue
-    #         case 2:
-    #             acc.withdraw()
-    #             continue
-    #         case 3:
-    #             acc.transfer()
-    #             continue
-    #         case 4:
-    #             break
+        match n:
+            case 1:
+                acc.deposit()
+                continue
+            case 2:
+                acc.withdraw()
+                continue
+            case 3:
+                acc.transfer()
+                continue
+            case 4:
+                break
         
