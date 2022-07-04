@@ -1,7 +1,7 @@
 class Account():
 
-
-    def __init__(self, new) -> None:
+    def __init__(self, client) -> None:
+        self.client = client
         self.balance = 0
  
 

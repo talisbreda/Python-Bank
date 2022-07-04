@@ -1,25 +1,31 @@
 class Client():
-    def __init__(self, name, email, phone, cpf, rg, new) -> None:
-        if new:
-            self.name = name
-            self.email = email
-            self.phone = phone
-            self.cpf = cpf
-            self.rg = rg
-        else:
-            pass
+    def __init__(self, id, name, email, phone, cpf, rg, new) -> None:
+        self.id = id
+        self.name = name
+        self.email = email
+        self.phone = phone
+        self.cpf = cpf
+        self.rg = rg
+        self.new = new
 
+
+    def getId(self):
+        return self.id
+    def getNew(self):
+        return self.new
     def getName(self):
-        print(self.name)
+        return self.name
     def getEmail(self):
-        print(self.email)
+        return self.email
     def getPhone(self):
-        print(self.phone)
+        return self.phone
     def getCPF(self):
-        print(self.cpf)
+        return self.cpf
     def getRG(self):
-        print(self.rg)
+        return self.rg
     
+    def setNew(self, new):
+        self.new = new
     def setName(self, name):
         self.name = name
     def setEmail(self, email):
