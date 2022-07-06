@@ -28,7 +28,7 @@ def createNewAccount(holder):
             [{"id": id, "holder": holder.getId(), "accNumber": accNumber, "agency": 1, "accType": 1, "balance": 0}]
         )
         conn.commit()
-    return Account(holder)
+    return Account(holder, id)
 
 def authenticate(email, password):
     with engine.connect() as conn:
@@ -56,11 +56,11 @@ def accessClient(email):
 def accessAccount(holder):
     with engine.connect() as conn:
         result = conn.execute(
-            text("SELECT accNumber, agency, accType, balance FROM account WHERE holder = :holder"),
+            text("SELECT idAccount, accNumber, agency, accType, balance FROM account WHERE holder = :holder"),
             [{"holder": holder.getId()}])
         conn.commit()
-    result = result.first()
-    return Account(holder)
+    id = result.scalar()
+    return Account(holder, id)
 
 def bank(client):
     if client.getNew() == False:
