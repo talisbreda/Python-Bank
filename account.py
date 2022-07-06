@@ -5,7 +5,6 @@ engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabal
 
 class Account():
 
-
     def __init__(self, client, id) -> None:
         self.id = id
         self.client = client

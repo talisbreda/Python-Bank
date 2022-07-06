@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from random import randint
 from cryptography.fernet import Fernet
+from hashlib import md5
 
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 key = Fernet.generate_key()
@@ -37,11 +38,10 @@ def authenticate(email, password):
             [{"email": email}]
         )
         conn.commit()
-    accessClient(email)
-    # passcode = bytes(result.scalar(), 'UTF-8')
-    # decPasscode = fernet.decrypt(passcode).decode()
-    # if decPasscode == password:
-    #     accessClient(email)
+    encPassword = md5(password.encode('UTF-8')).hexdigest()
+    passcode = result.scalar()
+    if encPassword == passcode:
+        accessClient(email)
 
 def accessClient(email):
     with engine.connect() as conn:
@@ -111,7 +111,7 @@ while True:
             print("Please insert your RG")
             rg = input()
             print("Please insert a password")
-            passcode = fernet.encrypt(input().encode())
+            passcode = md5(input().encode('UTF-8')).hexdigest()
             
             createNewClient()
 
