@@ -10,7 +10,9 @@ engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabal
 key = Fernet.generate_key()
 fernet = Fernet(key)
 
-def createNewClient():
+def createNewClient(id, fullname, email, phone, cpf, rg):
+
+    checkId(id)
 
     with engine.connect() as conn:
         conn.execute(
@@ -21,12 +23,13 @@ def createNewClient():
 
 def createNewAccount(holder):
 
-    id = randint(000000, 999999)
-    accNumber = randint(00000000, 99999999)
+    id = checkId(randint(000000, 999999))
+    accNum = checkAcc(randint(000000, 999999))
+    
     with engine.connect() as conn:
         conn.execute(
             text("INSERT INTO account (idAccount, holder, accNumber, agency, accType, balance) VALUES (:id, :holder, :accNumber, :agency, :accType, :balance)"),
-            [{"id": id, "holder": holder.getId(), "accNumber": accNumber, "agency": 1, "accType": 1, "balance": 0}]
+            [{"id": id, "holder": holder.getId(), "accNumber": accNum, "agency": 1, "accType": 1, "balance": 0}]
         )
         conn.commit()
     return Account(holder, id)
@@ -42,6 +45,32 @@ def authenticate(email, password):
     passcode = result.scalar()
     if encPassword == passcode:
         accessClient(email)
+
+def checkId(id):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT idClient FROM client WHERE idClient = :id"),
+            [{"id": id}]
+        )
+        conn.commit()
+    if result.scalar() != '':
+        id = randint(000000, 999999)
+        checkId(id)
+    else:
+        return id
+    
+def checkAcc(id):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT idAccount FROM account WHERE idAccount = :id"),
+            [{"id": id}]
+        )
+        conn.commit()
+    if result.scalar() != '':
+        id = randint(000000, 999999)
+        checkId(id)
+    else:
+        return id
 
 def accessClient(email):
     with engine.connect() as conn:
@@ -113,7 +142,7 @@ while True:
             print("Please insert a password")
             passcode = md5(input().encode('UTF-8')).hexdigest()
             
-            createNewClient()
+            createNewClient(id, fullname, email, phone, cpf, rg)
 
             engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 
