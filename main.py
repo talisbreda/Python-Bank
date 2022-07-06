@@ -10,16 +10,35 @@ engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabal
 key = Fernet.generate_key()
 fernet = Fernet(key)
 
-def createNewClient(id, fullname, email, phone, cpf, rg):
+def createNewClient():
+    id = randint(000000, 999999)
+    print("Please insert your name")
+    fullname = input()
+    print("Please insert your e-mail")
+    email = input()
+    print("Please insert a phone number")
+    phone = input()
+    print("Please insert your CPF")
+    cpf = input()
+    print("Please insert your RG")
+    rg = input()
+    print("Please insert a password")
+    passcode = md5(input().encode('UTF-8')).hexdigest()
 
     checkId(id)
-
-    with engine.connect() as conn:
-        conn.execute(
-            text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
-            [{"id": id, "passcode": passcode, "fullname": fullname, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
-        )
-        conn.commit()
+    valid = checkEmail(email)
+    
+    if valid:
+        with engine.connect() as conn:
+            conn.execute(
+                text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
+                [{"id": id, "passcode": passcode, "fullname": fullname, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
+            )
+            conn.commit()
+        client = Client(id, fullname, email, phone, cpf, rg, True)
+        bank(client)
+    else:
+        createNewClient()
 
 def createNewAccount(holder):
 
@@ -53,11 +72,26 @@ def checkId(id):
             [{"id": id}]
         )
         conn.commit()
-    if result.scalar() != '':
-        id = randint(000000, 999999)
-        checkId(id)
+    print(result.scalar())
+    if not (result.scalar() is None):
+        newid = randint(000000, 999999)
+        checkId(newid)
     else:
         return id
+
+def checkEmail(email):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT email FROM client WHERE email = :email"),
+            [{"email": email}]
+        )
+        conn.commit()
+    if result.scalar() != '':
+        print("E-mail is already in use")
+        return False
+    else:
+        return True
+
     
 def checkAcc(id):
     with engine.connect() as conn:
@@ -128,26 +162,7 @@ while True:
             loginPassword = input()
             authenticate(loginEmail, loginPassword)
         case 2:
-            id = randint(000000, 999999)
-            print("Please insert your name")
-            fullname = input()
-            print("Please insert your e-mail")
-            email = input()
-            print("Please insert a phone number")
-            phone = input()
-            print("Please insert your CPF")
-            cpf = input()
-            print("Please insert your RG")
-            rg = input()
-            print("Please insert a password")
-            passcode = md5(input().encode('UTF-8')).hexdigest()
-            
-            createNewClient(id, fullname, email, phone, cpf, rg)
-
-            engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
-
-            client = Client(id, fullname, email, phone, cpf, rg, True)
-            bank(client)
+            createNewClient()
             continue
         case 3:
             break
