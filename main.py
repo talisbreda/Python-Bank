@@ -149,38 +149,44 @@ def bank(client):
     while True:
 
         print("Type 1 to deposit, 2 to withdraw, 3 to transfer, 4 to leave")
-        n = int(input())
+        try:
+            n = int(input())
 
-        match n:
-            case 1:
-                acc.deposit()
-                continue
-            case 2:
-                acc.withdraw()
-                continue
-            case 3:
-                acc.transfer()
-                continue
-            case 4:
-                break
+            match n:
+                case 1:
+                    acc.deposit()
+                    continue
+                case 2:
+                    acc.withdraw()
+                    continue
+                case 3:
+                    acc.transfer()
+                    continue
+                case 4:
+                    break
+        except ValueError: 
+            print("Please insert a valid number")
 
 while True:
 
     print("Type 1 to sign in, 2 to register, 3 to stop")
-    m = int(input())
+    try:
+        m = int(input())
 
-    match m:
-        case 1:
-            print("E-mail:")
-            loginEmail = input()
-            print("Password")
-            loginPassword = input()
-            authenticate(loginEmail, loginPassword)
-        case 2:
-            createNewClient()
-            continue
-        case 3:
-            break
+        match m:
+            case 1:
+                print("E-mail:")
+                loginEmail = input()
+                print("Password")
+                loginPassword = input()
+                authenticate(loginEmail, loginPassword)
+            case 2:
+                createNewClient()
+                continue
+            case 3:
+                break
+    except ValueError: 
+            print("Please insert a valid number")
 
 
             
