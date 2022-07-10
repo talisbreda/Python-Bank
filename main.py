@@ -54,6 +54,12 @@ def createNewAccount(holder):
         conn.commit()
     return Account(holder, id)
 
+def testResult(result):
+    if result is None:
+        raise Exception("Credentials are incorrect")
+    else:
+        return result
+    
 def authenticate(email, password):
     with engine.connect() as conn:
         result = conn.execute(
@@ -61,10 +67,16 @@ def authenticate(email, password):
             [{"email": email}]
         )
         conn.commit()
-    encPassword = md5(password.encode('UTF-8')).hexdigest()
-    passcode = result.scalar()
-    if encPassword == passcode:
-        accessClient(email)
+    try:
+        passcode = testResult(result.scalar())
+        encPassword = md5(password.encode('UTF-8')).hexdigest()
+        if encPassword == passcode:
+            accessClient(email)
+        else:
+            raise Exception("Credentials are incorrect")
+    except Exception as e:
+        print(e)
+
 
 def checkId(id):
     with engine.connect() as conn:
@@ -74,7 +86,7 @@ def checkId(id):
         )
         conn.commit()
     try:
-        print(result.one())
+        test = testResult(result.one())
         newid = randint(100000, 999999)
         checkId(newid)
     except:
@@ -88,7 +100,7 @@ def checkEmail(email):
         )
         conn.commit()
     try:
-        print(result.one())
+        test = testResult(result.one())
         print("E-mail is already in use")
         return False
     except:
