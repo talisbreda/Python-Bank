@@ -5,13 +5,14 @@ from sqlalchemy import text
 from random import randint
 from cryptography.fernet import Fernet
 from hashlib import md5
+from sqlalchemy.orm.exc import NoResultFound
 
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 key = Fernet.generate_key()
 fernet = Fernet(key)
 
 def createNewClient():
-    id = randint(000000, 999999)
+    id = randint(100000, 999999)
     print("Please insert your name")
     fullname = input()
     print("Please insert your e-mail")
@@ -42,8 +43,8 @@ def createNewClient():
 
 def createNewAccount(holder):
 
-    id = checkId(randint(000000, 999999))
-    accNum = checkAcc(randint(000000, 999999))
+    id = checkId(randint(100000, 999999))
+    accNum = checkAcc(randint(100000, 999999))
     
     with engine.connect() as conn:
         conn.execute(
@@ -72,11 +73,11 @@ def checkId(id):
             [{"id": id}]
         )
         conn.commit()
-    print(result.scalar())
-    if not (result.scalar() is None):
-        newid = randint(000000, 999999)
+    try:
+        print(result.one())
+        newid = randint(100000, 999999)
         checkId(newid)
-    else:
+    except:
         return id
 
 def checkEmail(email):
@@ -86,10 +87,11 @@ def checkEmail(email):
             [{"email": email}]
         )
         conn.commit()
-    if result.scalar() != '':
+    try:
+        print(result.one())
         print("E-mail is already in use")
         return False
-    else:
+    except:
         return True
 
     
@@ -101,8 +103,9 @@ def checkAcc(id):
         )
         conn.commit()
     if result.scalar() != '':
-        id = randint(000000, 999999)
-        checkId(id)
+        id = randint(100000, 999999)
+        newid = checkId(id)
+        return newid
     else:
         return id
 

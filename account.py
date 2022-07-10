@@ -20,11 +20,13 @@ class Account():
         print("Insert the value of the withdrawal")
         value = float(input())
         self.balance = self.dbUpdate('withdraw', int(value*100))
+        print("New balance: $%.2f" % (self.balance/100))
     
     def transfer(self):
         print("Insert the value of the transfer")
         value = float(input())
         self.balance = self.dbUpdate('transfer', int(value*100))
+        print("New balance: $%.2f" % (self.balance/100))
         
     # def checkBalance(self, value):
     #     if value > self.balance: 
