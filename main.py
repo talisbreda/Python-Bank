@@ -4,8 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from random import randint
 from cryptography.fernet import Fernet
-from hashlib import md5
-from sqlalchemy.orm.exc import NoResultFound
+from hashlib import sha3_256
 
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 key = Fernet.generate_key()
@@ -24,7 +23,7 @@ def createNewClient():
     print("Please insert your RG")
     rg = input()
     print("Please insert a password")
-    passcode = md5(input().encode('UTF-8')).hexdigest()
+    passcode = sha3_256(input().encode('UTF-8')).hexdigest()
 
     checkId(id)
     valid = checkEmail(email)
@@ -69,7 +68,7 @@ def authenticate(email, password):
         conn.commit()
     try:
         passcode = testResult(result.scalar())
-        encPassword = md5(password.encode('UTF-8')).hexdigest()
+        encPassword = sha3_256(password.encode('UTF-8')).hexdigest()
         if encPassword == passcode:
             accessClient(email)
         else:
