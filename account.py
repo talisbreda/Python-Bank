@@ -51,6 +51,7 @@ class Account():
                 print("New balance: $%.2f" % (balance/100))
         if transaction == 'transfer':
             if value > balance:
+            
                 print("Insufficient balance")
             else:
                 print("Insert the receiver's account number")
