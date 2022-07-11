@@ -1,6 +1,7 @@
 from tkinter import *
+from main import createNewClient
 
-class Application:
+class RegisterApplication:
     def __init__(self, master=None):
         self.widget1 = Frame(master)
         self.widget1.pack()
@@ -104,12 +105,25 @@ class Application:
         self.confirmPasswordEntry["width"] = 40
         self.confirmPasswordEntry.pack()
 
-        self.loginButton = Button(self.widget1, text="Register")
-        self.loginButton["width"] = 15
-        self.loginButton.pack(pady = 20)
+
+        self.registerButton = Button(self.widget1, text="Register")
+        self.registerButton["width"] = 15
+        self.registerButton.bind("<Button-1>", self.createClient)
+        self.registerButton.pack(pady = 20)
+
+    def createClient(self, event):
+        self.name = self.nameEntry.get()
+        self.email = self.emailEntry.get()
+        self.phone = self.phoneEntry.get()
+        self.cpf = self.cpfEntry.get()
+        self.rg = self.rgEntry.get()
+        self.password = self.passwordEntry.get()
+
+        createNewClient(self.name, self.email, self.phone, self.cpf, self.rg, self.password)
+
 
 
 root = Tk()
 root.geometry("500x700")
-Application(root)
+RegisterApplication(root)
 root.mainloop()

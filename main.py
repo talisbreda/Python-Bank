@@ -13,26 +13,16 @@ import re
 engine = create_engine("mysql+mysqlconnector://root:256984@localhost:3306/trabalho", echo=True, future=True)
 
 # Cria um novo cliente no banco de dados com base em inputs do usuario
-def createNewClient():
+def createNewClient(name, email, phone, cpf, rg, password):
     id = randint(100000, 999999)
-    # Inputs do usuário
-    print("Please insert your name")
-    fullname = input()
-    print("Please insert your e-mail")
-    email = input()
-    print("Please insert a phone number")
-    phone = input()
-    print("Please insert your CPF")
-    cpf = input()
-    print("Please insert your RG")
-    rg = input()
-    print("Please insert a password")
+
     # Criptografia da senha inserida pelo usuário, usando SHA256
-    passcode = sha3_256(input().encode('UTF-8')).hexdigest()
+    passcode = sha3_256(password.encode('UTF-8')).hexdigest()
 
     # Verifica a unicidade do ID gerado
     id = checkId(id, "client")
     # Verifica se o email inserido é válido ou se já está registrado
+    print(email)
     valid = checkEmail(email)
     
     # Caso o email seja válido
@@ -41,16 +31,15 @@ def createNewClient():
         with engine.connect() as conn:
             conn.execute(
                 text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
-                [{"id": id, "passcode": passcode, "fullname": fullname, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
+                [{"id": id, "passcode": passcode, "fullname": name, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
             )
             conn.commit()
         # Instancia uma classe com os dados do cliente
-        client = Client(id, fullname, email, phone, cpf, rg, True)
+        client = Client(id, name, email, phone, cpf, rg, True)
         # Acessa os serviços bancários na conta recém registrada
         bank(client)
     else:
-        # Caso o e-mail não seja válido ou já exista, a criação de usuário é reiniciada
-        createNewClient()
+        return False
 
 # Cria uma nova conta no banco de dados
 def createNewAccount(holder):
@@ -84,18 +73,17 @@ def authenticate(email, password):
             [{"email": email}]
         )
         conn.commit()
-    try:
-        # Testa o resultado da busca no banco de dados, e retorna um erro caso esta seja nula
-        passcode = testResult(result.scalar())
-        # Criptografa a senha inserida e compara com a já existente no banco de dados
-        encPassword = sha3_256(password.encode('UTF-8')).hexdigest()
-        if encPassword == passcode:
-            accessClient(email)
-        else:
-            # Gera um erro caso algo as senhas sejam diferentes
-            raise Exception("Credentials are incorrect")
-    except Exception as e:
-        print(e)
+
+    # Testa o resultado da busca no banco de dados, e retorna um erro caso esta seja nula
+    passcode = testResult(result.scalar())
+    # Criptografa a senha inserida e compara com a já existente no banco de dados
+    encPassword = sha3_256(password.encode('UTF-8')).hexdigest()
+    if encPassword == passcode:
+        accessClient(email)
+    else:
+        # Gera um erro caso algo as senhas sejam diferentes
+        raise Exception("Credentials are incorrect")
+
 
 # Confere a unicidade do ID gerado
 def checkId(id, table):
@@ -216,26 +204,30 @@ def bank(client):
             # Caso o erro ValueError aconteça, significa que um input inválido foi inserido
             print("Please insert a valid number")
 
-while True:
+def main():
 
-    print("Type 1 to sign in, 2 to register, 3 to stop")
-    try:
-        m = int(input())
+    while True:
 
-        match m:
-            case 1:
-                print("E-mail:")
-                loginEmail = input()
-                print("Password")
-                loginPassword = input()
-                authenticate(loginEmail, loginPassword)
-            case 2:
-                createNewClient()
-                continue
-            case 3:
-                break
-    except ValueError: 
-            print("Please insert a valid number")
+        print("Type 1 to sign in, 2 to register, 3 to stop")
+        try:
+            m = int(input())
+
+            match m:
+                case 1:
+                    print("E-mail:")
+                    loginEmail = input()
+                    print("Password")
+                    loginPassword = input()
+                    authenticate(loginEmail, loginPassword)
+                case 2:
+                    createNewClient()
+                    continue
+                case 3:
+                    break
+        except ValueError: 
+                print("Please insert a valid number")
 
 
+if __name__ == "__main__":
+    main()
             

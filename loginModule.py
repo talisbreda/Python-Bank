@@ -1,6 +1,9 @@
 from tkinter import *
+from tkinter import messagebox
 
-class Application:
+from main import authenticate
+
+class LoginApplication:
     def __init__(self, master=None):
         self.widget1 = Frame(master)
         self.widget1.pack()
@@ -42,10 +45,19 @@ class Application:
 
         self.loginButton = Button(self.widget1, text="Login")
         self.loginButton["width"] = 15
+        self.loginButton.bind("<Button-1>", self.login)
         self.loginButton.pack(pady = 30)
+    
+    def login(self, event):
+        self.email = self.emailEntry.get()
+        self.password = self.passwordEntry.get()
+        try:
+            authenticate(self.email, self.password)
+        except:
+            messagebox.showwarning("Error", "Credentials are incorrect")
 
 
 root = Tk()
 root.geometry("400x500")
-Application(root)
+LoginApplication(root)
 root.mainloop()
