@@ -23,23 +23,32 @@ def createNewClient(name, email, phone, cpf, rg, password):
     id = checkId(id, "client")
     # Verifica se o email inserido é válido ou se já está registrado
     print(email)
-    valid = checkEmail(email)
+    checkEmail(email)
     
-    # Caso o email seja válido
-    if valid:
-        # Cria uma conexão para inserir uma nova linha na tabela de clientes do banco de dados
-        with engine.connect() as conn:
-            conn.execute(
-                text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
-                [{"id": id, "passcode": passcode, "fullname": name, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
-            )
-            conn.commit()
-        # Instancia uma classe com os dados do cliente
-        client = Client(id, name, email, phone, cpf, rg, True)
-        # Acessa os serviços bancários na conta recém registrada
-        bank(client)
-    else:
-        return False
+    # Cria uma conexão para inserir uma nova linha na tabela de clientes do banco de dados
+    with engine.connect() as conn:
+        conn.execute(
+            text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
+            [{"id": id, "passcode": passcode, "fullname": name, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
+        )
+        conn.commit()
+    # Instancia uma classe com os dados do cliente
+    client = Client(id, name, email, phone, cpf, rg, True)
+    # Acessa os serviços bancários na conta recém registrada
+    bank(client)
+
+# Checa a validade do e-mail e a sua existência no banco de dados
+def checkEmail(email):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT email FROM client WHERE email = :email"),
+            [{"email": email}]
+        )
+        conn.commit()
+    if testResult(re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email)) is None: 
+        raise Exception("E-mail is not valid")
+    if result.scalar() is not None: 
+        raise Exception("E-mail is already in use")
 
 # Cria uma nova conta no banco de dados
 def createNewAccount(holder):
@@ -110,29 +119,6 @@ def checkId(id, table):
         checkId(newid, table)
     except:
         return id
-
-# Checa a validade do e-mail e a sua existência no banco de dados
-def checkEmail(email):
-    with engine.connect() as conn:
-        result = conn.execute(
-            text("SELECT email FROM client WHERE email = :email"),
-            [{"email": email}]
-        )
-        conn.commit()
-    try:
-        # Caso result não seja nulo, significa que o e-mail testado já está cadastrado
-        test = testResult(result.scalar())
-        print("E-mail is already in use")
-        return False
-    except:
-        try:
-            # Teste para validar a sintaxe do e-mail inserido
-            # Caso o e-mail não seja válido, re.match() retorna nulo, criando um erro.
-            test = testResult(re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email))
-            return True
-        except:
-            print("E-mail is not valid")
-            return False
     
 # Checa a unicidade do número da conta gerado
 def checkAcc(accNum):
@@ -182,27 +168,6 @@ def bank(client):
     else:
         acc = createNewAccount(client)
         client.setNew(False)
-    while True:
-
-        print("Type 1 to deposit, 2 to withdraw, 3 to transfer, 4 to leave")
-        try:
-            n = int(input())
-
-            match n:
-                case 1:
-                    acc.deposit()
-                    continue
-                case 2:
-                    acc.withdraw()
-                    continue
-                case 3:
-                    acc.transfer()
-                    continue
-                case 4:
-                    break
-        except ValueError: 
-            # Caso o erro ValueError aconteça, significa que um input inválido foi inserido
-            print("Please insert a valid number")
 
 def main():
 

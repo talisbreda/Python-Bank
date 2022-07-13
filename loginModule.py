@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 
 from main import authenticate
+from bankModule import BankApplication
 
 class LoginApplication:
     def __init__(self, master=None):
@@ -47,17 +48,31 @@ class LoginApplication:
         self.loginButton["width"] = 15
         self.loginButton.bind("<Button-1>", self.login)
         self.loginButton.pack(pady = 30)
+
+        self.registerLink = Label(self.widget1, text="Google Hyperlink", fg="blue", cursor="hand2")
+        self.registerLink.bind("<Button-1>", self.redirectToRegister)
+        self.registerLink.pack()
     
     def login(self, event):
         self.email = self.emailEntry.get()
         self.password = self.passwordEntry.get()
         try:
             authenticate(self.email, self.password)
-        except:
-            messagebox.showwarning("Error", "Credentials are incorrect")
+            self.widget1.pack_forget()
+            BankApplication.__init__(BankApplication)
+        except Exception as e:
+            messagebox.showwarning("Error", e)
+    
+    def redirectToRegister(self, event):
+        self.widget1.pack_forget()
+        RegisterApplication.__init__(RegisterApplication)
 
+def main():
+    root = Tk()
+    root.geometry("400x500")
+    LoginApplication(root)
+    root.mainloop()
 
-root = Tk()
-root.geometry("400x500")
-LoginApplication(root)
-root.mainloop()
+if __name__ == "__main__":
+    main()
+           

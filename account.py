@@ -11,18 +11,22 @@ class Account():
         self.balance = 0
     
     # Deposita um valor na conta
-    def deposit(self):
-        print("Insert the value of the deposit")
-        value = float(input())
+    def deposit(self, balance, value):
         # Atualiza o saldo da conta no banco de dados
-        self.balance = self.dbUpdate('deposit', int(value*100))
+
+        balance += value
+        print("New balance: $%.2f" % (balance/100))
     
     # Retira um valor na conta
-    def withdraw(self):
-        print("Insert the value of the withdrawal")
-        value = float(input())
+    def withdraw(self, balance, value):
         # Atualiza o saldo da conta no banco de dados
-        self.balance = self.dbUpdate('withdraw', int(value*100))
+        # self.balance = self.dbUpdate('withdraw', int(value*100))
+
+        if value > balance:
+            print("Insufficient balance")
+        else:
+            balance -= value
+            print("New balance: $%.2f" % (balance/100))
     
     # Transfere um valor para outra conta
     def transfer(self):
@@ -40,24 +44,24 @@ class Account():
             )
             conn.commit()
         balance = int(result.scalar())
-        if transaction == 'deposit':
-            balance += value
-            print("New balance: $%.2f" % (balance/100))
-        if transaction == 'withdraw':
-            if value > balance:
-                print("Insufficient balance")
-            else:
-                balance -= value
-                print("New balance: $%.2f" % (balance/100))
+
+        match transaction:
+            case 'deposit':
+                self.deposit(balance, value)
+            case 'withdraw':
+                self.withdraw(balance, value)
+            case 'transfer':
+                self.transfer(balance, value)
+            
         if transaction == 'transfer':
             if value > balance:
-            
                 print("Insufficient balance")
             else:
                 print("Insert the receiver's account number")
                 accNumber = int(input())
                 print("Insert the receiver's agency")
                 agency = int(input())
+
                 try:
                     # Chama a função responsável por buscar a conta receptora no banco de dados e 
                     # atualizar seu saldo

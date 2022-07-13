@@ -1,5 +1,8 @@
 from tkinter import *
+from tkinter import messagebox
+
 from main import createNewClient
+from bankModule import BankApplication
 
 class RegisterApplication:
     def __init__(self, master=None):
@@ -111,6 +114,11 @@ class RegisterApplication:
         self.registerButton.bind("<Button-1>", self.createClient)
         self.registerButton.pack(pady = 20)
 
+
+        self.loginLink = Label(self.widget1, text="Google Hyperlink", fg="blue", cursor="hand2")
+        self.loginLink.bind("<Button-1>", self.redirectTologin)
+        self.loginLink.pack()
+
     def createClient(self, event):
         self.name = self.nameEntry.get()
         self.email = self.emailEntry.get()
@@ -119,11 +127,21 @@ class RegisterApplication:
         self.rg = self.rgEntry.get()
         self.password = self.passwordEntry.get()
 
-        createNewClient(self.name, self.email, self.phone, self.cpf, self.rg, self.password)
+        try:
+            createNewClient(self.name, self.email, self.phone, self.cpf, self.rg, self.password)
+            BankApplication.__init__()
+        except Exception as e:
+            messagebox.showwarning("Error", e)
+        
+    def redirectToLogin(self, event):
+        self.widget1.pack_forget()
+        LoginApplication.__init__(LoginApplication)
 
+def main():
+    root = Tk()
+    root.geometry("500x700")
+    RegisterApplication(root)
+    root.mainloop()
 
-
-root = Tk()
-root.geometry("500x700")
-RegisterApplication(root)
-root.mainloop()
+if __name__ == "__main__":
+    main()
