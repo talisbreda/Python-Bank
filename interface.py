@@ -355,7 +355,7 @@ class MainApplication:
 
     def depositModule(self, event, account, master=None):
         def update(event):
-            account.deposit(int(self.depositValueEntry.get())*100)
+            account.deposit(int(float(self.depositValueEntry.get())*100))
             self.depositBody.pack_forget()
             self.showBalance(self, account)
 
@@ -394,7 +394,7 @@ class MainApplication:
     def withdrawModule(self, event, account, master=None):
         def update(event):
             try:
-                account.withdraw(int(float(self.withdrawValueEntry.get()))*100)
+                account.withdraw(int(float(self.withdrawValueEntry.get())*100))
                 self.withdrawBody.pack_forget()
                 self.showBalance(self, account)
             except Exception as e:
@@ -436,7 +436,7 @@ class MainApplication:
             try:
                 accNumber = int(self.accNumEntry.get())
                 agency = int(self.agencyEntry.get())
-                value = int(self.transferValueEntry.get())*100
+                value = int(float(self.transferValueEntry.get())*100)
 
                 account.transfer(accNumber, agency, value)
                 self.transferBody.pack_forget()
