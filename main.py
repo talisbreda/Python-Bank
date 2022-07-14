@@ -35,7 +35,7 @@ def createNewClient(name, email, phone, cpf, rg, password):
     # Instancia uma classe com os dados do cliente
     client = Client(id, name, email, phone, cpf, rg, True)
     # Acessa os serviços bancários na conta recém registrada
-    bank(client)
+    return bank(client)
 
 # Checa a validade do e-mail e a sua existência no banco de dados
 def checkEmail(email):
@@ -45,7 +45,7 @@ def checkEmail(email):
             [{"email": email}]
         )
         conn.commit()
-    if testResult(re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email)) is None: 
+    if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email) is None: 
         raise Exception("E-mail is not valid")
     if result.scalar() is not None: 
         raise Exception("E-mail is already in use")
@@ -88,7 +88,7 @@ def authenticate(email, password):
     # Criptografa a senha inserida e compara com a já existente no banco de dados
     encPassword = sha3_256(password.encode('UTF-8')).hexdigest()
     if encPassword == passcode:
-        accessClient(email)
+        return accessClient(email)
     else:
         # Gera um erro caso algo as senhas sejam diferentes
         raise Exception("Credentials are incorrect")
@@ -148,7 +148,7 @@ def accessClient(email):
     # Instanciação da classe Client
     client = Client(result[0], result[1], email, result[2], result[3], result[4], False)
     # Acesso aos serviços bancários a partir da conta do cliente
-    bank(client)
+    return bank(client)
 
 # Instanciação da classe Account para realização dos serviços
 def accessAccount(holder):
@@ -164,10 +164,10 @@ def bank(client):
     # Se o cliente foi recém-criado, é necessário criar uma nova linha na tabela de contas do
     # banco de dados
     if client.getNew() == False:
-        acc = accessAccount(client)
+        return accessAccount(client)
     else:
-        acc = createNewAccount(client)
         client.setNew(False)
+        return createNewAccount(client)
 
 def main():
 

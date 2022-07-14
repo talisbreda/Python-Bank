@@ -10,102 +10,93 @@ class Account():
         self.client = client
         self.balance = 0
     
-    # Deposita um valor na conta
-    def deposit(self, balance, value):
-        # Atualiza o saldo da conta no banco de dados
-
-        balance += value
-        print("New balance: $%.2f" % (balance/100))
-    
-    # Retira um valor na conta
-    def withdraw(self, balance, value):
-        # Atualiza o saldo da conta no banco de dados
-        # self.balance = self.dbUpdate('withdraw', int(value*100))
-
-        if value > balance:
-            print("Insufficient balance")
-        else:
-            balance -= value
-            print("New balance: $%.2f" % (balance/100))
-    
-    # Transfere um valor para outra conta
-    def transfer(self):
-        print("Insert the value of the transfer")
-        value = float(input())
-        self.balance = self.dbUpdate('transfer', int(value*100))
-    
-    # Função responsável por fazer atualizações no banco de dados, recebendo o valor da alteração
-    # e a operação a ser realizada
-    def dbUpdate(self, transaction, value):
+    def retrieveBalance(self, id):
         with engine.connect() as conn:
             result = conn.execute(
                 text("SELECT balance FROM account WHERE idAccount = :id"),
-                [{"id": int(self.id)}]
+                [{"id": self.id}]
             )
             conn.commit()
-        balance = int(result.scalar())
-
-        match transaction:
-            case 'deposit':
-                self.deposit(balance, value)
-            case 'withdraw':
-                self.withdraw(balance, value)
-            case 'transfer':
-                self.transfer(balance, value)
-            
-        if transaction == 'transfer':
-            if value > balance:
-                print("Insufficient balance")
-            else:
-                print("Insert the receiver's account number")
-                accNumber = int(input())
-                print("Insert the receiver's agency")
-                agency = int(input())
-
-                try:
-                    # Chama a função responsável por buscar a conta receptora no banco de dados e 
-                    # atualizar seu saldo
-                    self.transferToReceiver(accNumber, agency, value)
-                    balance -= value
-                    print("New balance: $%.2f" % (balance/100))
-                except: 
-                    print("Account not found")
         
-        # Atualiza o saldo da conta instanciada
+        return result.scalar()
+    
+    def updateBalance(self, balance):
         with engine.connect() as conn:
-            conn.execute(
+            result = conn.execute(
                 text("UPDATE account SET balance = :balance WHERE idAccount = :id"),
                 [{"balance": balance, "id": self.id}]
             )
             conn.commit()
-        return balance
+    
+    # Deposita um valor na conta
+    def deposit(self, value):
+        # Atualiza o saldo da conta no banco de dados
+
+        balance = self.retrieveBalance(self.id)
+        balance += value
+        print("New balance: $%.2f" % (balance/100))
+        self.updateBalance(balance)
+    
+    # Retira um valor na conta
+    def withdraw(self, value):
+        # Atualiza o saldo da conta no banco de dados
+        # self.balance = self.dbUpdate('withdraw', int(value*100))
+
+        balance = self.retrieveBalance(self.id)
+
+        if value > balance:
+            raise Exception("Insufficient balance")
+        else:
+            balance -= value
+            print("New balance: $%.2f" % (balance/100))
+        
+        self.updateBalance(balance)
+    
+    # Transfere um valor para outra conta
+    def transfer(self, accNumber, agency, value):
+
+        balance = self.retrieveBalance(self.id)
+
+        if value > balance:
+            raise Exception("Insufficient balance")
+        else:
+            balance -= value
+            print("New balance: $%.2f" % (balance/100))
+
+        self.transferToReceiver(accNumber, agency, value, balance)
+
+        self.updateBalance(balance)
     
     # Função responsável por atualizar os dados da conta receptora de uma transferência
-    def transferToReceiver(self, accNumber, agency, value):
-        with engine.connect() as conn:
-            result = conn.execute(
-                text("SELECT balance FROM account WHERE accNumber = :accNumber and agency = :agency"),
-                [{"accNumber": accNumber, "agency": agency}]
-            )
-            conn.commit()
+    def transferToReceiver(self, accNumber, agency, value, balance):
+        
         try:
-            # Se o resultado não for nulo, significa que a conta existe e a operação pode ser realizada
-            balance = self.testResult(result.scalar())
-            balance += value
+            with engine.connect() as conn:
+                result = conn.execute(
+                    text("SELECT balance FROM account WHERE accNumber = :accNumber and agency = :agency"),
+                    [{"balance": balance, "accNumber": accNumber, "agency": agency}]
+                )
+            conn.commit()
+
+            newBalance = int(result.scalar()) + value
+
             with engine.connect() as conn:
                 conn.execute(
-                    text("UPDATE account SET balance = :balance WHERE accNumber = :accNumber"),
-                    [{"balance": balance, "accNumber": accNumber}]
+                    text("UPDATE account SET balance = :balance WHERE accNumber = :accNumber and agency = :agency"),
+                    [{"balance": newBalance, "accNumber": accNumber, "agency": agency}]
                 )
                 conn.commit()
         except:
             # Caso o resultado seja nulo (a conta não existe), cria um erro a ser tratado 
             # na função dbUpdate
-            raise Exception
+            raise Exception("Account does not exist")
         
     def testResult(self, result):
         if result is None:
             raise Exception("Credentials are incorrect")
         else:
             return result
+    
+    def getId(self):
+        return self.id
         

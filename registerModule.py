@@ -116,7 +116,7 @@ class RegisterApplication:
 
 
         self.loginLink = Label(self.widget1, text="Google Hyperlink", fg="blue", cursor="hand2")
-        self.loginLink.bind("<Button-1>", self.redirectTologin)
+        self.loginLink5bind("<Button-1>", self.redirectTologin)
         self.loginLink.pack()
 
     def createClient(self, event):
