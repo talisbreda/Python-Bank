@@ -3,12 +3,17 @@ from tkinter import messagebox
 
 from main import *
 
+# Tela principal, onde aparecem opções para login e criação de conta
 class MainApplication:
     def __init__(self, master=None):
+        # Função ativada ao clicar no botão de registrar-se
+        # Limpa a tela atual (main) e instancia a classe RegisterApplication
         def redirectToRegister(event):
             self.mainBody.pack_forget()
             RegisterApplication.__init__(RegisterApplication)
         
+        # Função ativada ao clicar no botão de login
+        # Limpa a tela atual (main) e instancia a classe LoginApplication
         def redirectToLogin(event):
             self.mainBody.pack_forget()
             LoginApplication.__init__(LoginApplication)
@@ -48,9 +53,16 @@ class MainApplication:
         self.loginButton.bind("<ButtonRelease>", redirectToLogin)
         self.loginButton.pack(pady = 15)
 
+
+
+# Tela de registro/criação de conta
 class RegisterApplication(MainApplication) :
     def __init__(self, master=None):
+
+        # Função executada ao clicar no botão de registrar
         def registerClient(event):
+
+            # Obtém os dados dos inputs
             self.name = self.nameEntry.get()
             self.email = self.emailEntry.get()
             self.phone = self.phoneEntry.get()
@@ -59,12 +71,14 @@ class RegisterApplication(MainApplication) :
             self.password = self.passwordEntry.get()
             self.confirmPassword = self.confirmPasswordEntry.get()
 
-            valid = True
-
+            # Bloco try/except para tratar possíveis problemas de input
             try:
+                # Caso algum input esteja vazio, mostra um aviso para preencher todos
                 if self.name=="" or self.email=="" or self.phone=="" or self.cpf=="" or self.rg=="" or self.password=="" or self.confirmPassword=="":
                     messagebox.showwarning("Erro", "Por favor preencha todos os campos")
                 else:
+                    # Tenta converter os inputs de telefone, CPF e RG para inteiro
+                    # Se não for possível, significa que não são números, e uma exceção ValueError é capturada
                     phone = int(self.phone)
                     cpf = int(self.cpf)
                     rg = int(self.rg)
@@ -75,12 +89,14 @@ class RegisterApplication(MainApplication) :
                             self.registerBody.pack_forget()
                             BankApplication.__init__(BankApplication, account)
                         except Exception as e:
+                            # Tratamento de erros provenientes do back-end, principalmente relacionados a validação de e-mail
                             messagebox.showwarning("Erro", e)
                     else:
                         messagebox.showwarning("Erro", "As senhas não correspondem")
             except ValueError:
                 messagebox.showwarning("Erro", "Os campos telefone, CPF e RG devem conter APENAS números")
 
+        # Caso o usuário clique no link para login, será redirecionado à tela de login
         def redirectToLogin(event):
             self.registerBody.pack_forget()
             LoginApplication.__init__(LoginApplication)
@@ -200,23 +216,31 @@ class RegisterApplication(MainApplication) :
     
         
 
+
+# Tela de login/autenticação
 class LoginApplication(RegisterApplication):
     def __init__(self, master=None):
-        def redirectToRegister(event):
-            self.loginBody.pack_forget()
-            RegisterApplication.__init__(RegisterApplication)
-
+        
+        # Função executada ao clicar no botão de login
         def login(event):
+
+            # Obtém os dados dos inputs
             self.email = self.emailEntry.get()
             self.password = self.passwordEntry.get()
-            # email = emailEntry.get()
-            # password = passwordEntry.get()
+
+            # Tentativa de autenticação
             try:
                 account = authenticate(self.email, self.password)
                 self.loginBody.pack_forget()
                 BankApplication.__init__(BankApplication, account)
             except Exception as e:
+                # Tratamento de erros provenientes do back-end, principalmente relacionados a credenciais incorretas
                 messagebox.showwarning("Erro", e)
+
+        # Caso o usuário clique no link para registrar-se, será redirecionado à tela de registro
+        def redirectToRegister(event):
+            self.loginBody.pack_forget()
+            RegisterApplication.__init__(RegisterApplication)
                 
         self.loginBody = Frame(master)
         self.loginBody.pack()
@@ -266,8 +290,13 @@ class LoginApplication(RegisterApplication):
     
         self.loginButton.bind("<ButtonRelease>", login)
 
+
+
+
+# Tela principal, onde são mostradas as opções de operações a serem realizadas
 class BankApplication(MainApplication):
     def __init__(self, account, master=None):
+        # Funções chamadas ao clique dos botões de operações
         def preDeposit(event):
             DepositApplication.__init__(DepositApplication, account)
         
@@ -277,13 +306,15 @@ class BankApplication(MainApplication):
         def preTransfer(event):
             TransferApplication.__init__(TransferApplication, account)
 
+        # Função chamada ao clicar no botão de voltar
         def backToHome(event):
+            # Caixa de confirmação se o usuário realmente deseja sair
             res = messagebox.askquestion('Sair', 'Tem certeza que deseja sair?')
             if res == 'yes':
                 self.bankBody.pack_forget() 
                 MainApplication.__init__(MainApplication)
             elif res == 'no':
-                return False
+                pass
 
         self.bankBody = Frame(master)
         self.bankBody.pack()
@@ -321,16 +352,27 @@ class BankApplication(MainApplication):
         self.backToHomeButton.pack(side=LEFT, pady=10)
         self.backToHomeButton.bind("<ButtonRelease>", backToHome)
 
+
+
+
+# Tela de depósito
 class DepositApplication(BankApplication):
     def __init__(self, account, master=None):
+
+        # Função executada ao clicar no botão de executar
         def update(event):
             try:
-                account.deposit(int(float(self.depositValueEntry.get())*100))
+                # Converte as vírgulas em pontos
+                value = self.depositValueEntry.get().replace(',', '.')
+                
+                account.deposit(int(float(value)*100))
                 self.depositBody.pack_forget()
                 ShowBalance.__init__(ShowBalance, account)
             except Exception as e:
+                # Caso o input esteja vazio ou não seja um número, um erro será capturado
                 messagebox.showwarning("Erro", "Favor inserir um número válido")
 
+        # Executada ao clicar no botão de voltar
         def backToMain(event):
             self.depositBody.pack_forget()
             BankApplication.__init__(BankApplication, account)
@@ -362,21 +404,87 @@ class DepositApplication(BankApplication):
         self.backToMainButton.pack(side=LEFT, pady=10)
         self.backToMainButton.bind("<ButtonRelease>", backToMain)
 
-class TransferApplication(BankApplication):
+
+
+
+# Tela de Saque
+class WithdrawApplication(BankApplication):
     def __init__(self, account, master=None):
+        # Função executada ao clicar no botão de saque
         def update(event):
             try:
+                # Converte as víruglas em pontos
+                value = self.withdrawValueEntry.get().replace(',', '.')
+
+                account.withdraw(int(float(value)*100))
+                self.withdrawBody.pack_forget()
+                ShowBalance.__init__(ShowBalance, account)
+            except Exception as e:
+                # Caso o input não seja um número ou esteja vazio, captura um erro
+                messagebox.showwarning("Erro", "Favor inserir um número válido")
+        
+        # Função executada ao clicar no botão de voltar
+        def backToMain(event):
+            self.withdrawBody.pack_forget()
+            BankApplication.__init__(BankApplication, account)
+
+        self.bankBody.pack_forget()
+
+        self.withdrawBody = Frame(master)
+        self.withdrawBody.pack()
+
+        self.title = Label(self.withdrawBody, text="Banco Python")
+        self.title["font"] = ("Verdana", "16", "bold")
+        self.title.pack()
+
+        self.subtitle = Label(self.withdrawBody, text="Escolha o valor do saque")
+        self.subtitle["font"] = ("Verdana", "12", "bold")
+        self.subtitle.pack(pady = 55)
+
+        self.withdrawValueEntry = Entry(self.withdrawBody)
+        self.withdrawValueEntry["width"] = 40
+        self.withdrawValueEntry.pack()
+
+        self.confirmWithdrawButton = Button(self.withdrawBody, text="Sacar")
+        self.confirmWithdrawButton["width"] = 15
+        self.confirmWithdrawButton.bind("<ButtonRelease>", update)
+        self.confirmWithdrawButton.pack(pady = 20)
+
+        self.backToMainButton = Button(self.withdrawBody, text="Voltar")
+        self.backToMainButton["width"] = 15
+        self.backToMainButton.pack(side=LEFT, pady=10)
+        self.backToMainButton.bind("<ButtonRelease>", backToMain)
+
+
+
+
+
+# Tela de transferência
+class TransferApplication(BankApplication):
+    def __init__(self, account, master=None):
+
+        # Função ativada ao clicar no botão de transferência
+        def update(event):
+            try:
+                # Tentativa de converter os inputs em números. Caso não sejam números, um erro será capturado
                 accNumber = int(self.accNumEntry.get())
                 agency = int(self.agencyEntry.get())
-                value = int(float(self.transferValueEntry.get())*100)
+
+                # Converte as vírgulas em pontos
+                value = self.transferValueEntry.get().replace(',', '.')
+                value = int(float(value)*100)
 
                 account.transfer(accNumber, agency, value)
                 self.transferBody.pack_forget()
                 ShowBalance.__init__(ShowBalance, account)
             except ValueError:
+                # Captura erros de input (string ou vazio onde deveria ser números)
                 messagebox.showwarning("Erro", "Favor inserir apenas números")
             except Exception as e:
+                # Captura erros provenientes do back-end, principalmente relacionados à não correspondência de dados
                 messagebox.showwarning("Erro", e)
+        
+        # Função chamada ao clicar no botão de voltar
         def backToMain(event):
             self.transferBody.pack_forget()
             BankApplication.__init__(BankApplication, account)
@@ -428,48 +536,16 @@ class TransferApplication(BankApplication):
         self.backToMainButton.pack(side=LEFT, pady=10)  
         self.backToMainButton.bind("<ButtonRelease>", backToMain)
 
-class WithdrawApplication(BankApplication):
-    def __init__(self, account, master=None):
-        def update(event):
-            try:
-                account.withdraw(int(float(self.withdrawValueEntry.get())*100))
-                self.withdrawBody.pack_forget()
-                ShowBalance.__init__(ShowBalance, account)
-            except Exception as e:
-                messagebox.showwarning("Erro", "Favor inserir um número válido")
-        def backToMain(event):
-            self.withdrawBody.pack_forget()
-            BankApplication.__init__(BankApplication, account)
 
-        self.bankBody.pack_forget()
 
-        self.withdrawBody = Frame(master)
-        self.withdrawBody.pack()
 
-        self.title = Label(self.withdrawBody, text="Banco Python")
-        self.title["font"] = ("Verdana", "16", "bold")
-        self.title.pack()
 
-        self.subtitle = Label(self.withdrawBody, text="Escolha o valor do saque")
-        self.subtitle["font"] = ("Verdana", "12", "bold")
-        self.subtitle.pack(pady = 55)
 
-        self.withdrawValueEntry = Entry(self.withdrawBody)
-        self.withdrawValueEntry["width"] = 40
-        self.withdrawValueEntry.pack()
-
-        self.confirmWithdrawButton = Button(self.withdrawBody, text="Sacar")
-        self.confirmWithdrawButton["width"] = 15
-        self.confirmWithdrawButton.bind("<ButtonRelease>", update)
-        self.confirmWithdrawButton.pack(pady = 20)
-
-        self.backToMainButton = Button(self.withdrawBody, text="Voltar")
-        self.backToMainButton["width"] = 15
-        self.backToMainButton.pack(side=LEFT, pady=10)
-        self.backToMainButton.bind("<ButtonRelease>", backToMain)
-
+# Tela executada ao concluir alguma operação, mostra o novo saldo
 class ShowBalance:
     def __init__(self, account, master=None):
+
+        # Volta à tela principal
         def backToMain(event):
             self.balanceBody.pack_forget()
             BankApplication.__init__(BankApplication, account)

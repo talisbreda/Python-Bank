@@ -22,7 +22,6 @@ def createNewClient(name, email, phone, cpf, rg, password):
     # Verifica a unicidade do ID gerado
     id = checkId(id, "client")
     # Verifica se o email inserido é válido ou se já está registrado
-    print(email)
     checkEmail(email)
     
     # Cria uma conexão para inserir uma nova linha na tabela de clientes do banco de dados
@@ -45,10 +44,11 @@ def checkEmail(email):
             [{"email": email}]
         )
         conn.commit()
+    # Validação do e-mail, tanto relacionada à sintaxe quanto à unicidade
     if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email) is None: 
-        raise Exception("E-mail is not valid")
+        raise Exception("O E-mail não é válido")
     if result.scalar() is not None: 
-        raise Exception("E-mail is already in use")
+        raise Exception("E-mail já está em uso")
 
 # Cria uma nova conta no banco de dados
 def createNewAccount(holder):
@@ -168,31 +168,4 @@ def bank(client):
     else:
         client.setNew(False)
         return createNewAccount(client)
-
-def main():
-
-    while True:
-
-        print("Type 1 to sign in, 2 to register, 3 to stop")
-        try:
-            m = int(input())
-
-            match m:
-                case 1:
-                    print("E-mail:")
-                    loginEmail = input()
-                    print("Password")
-                    loginPassword = input()
-                    authenticate(loginEmail, loginPassword)
-                case 2:
-                    createNewClient()
-                    continue
-                case 3:
-                    break
-        except ValueError: 
-                print("Please insert a valid number")
-
-
-if __name__ == "__main__":
-    main()
             
