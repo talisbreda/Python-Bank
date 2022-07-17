@@ -156,7 +156,7 @@ class RegisterApplication(MainApplication) :
         self.cpfTextContainer["height"] = 15
         self.cpfTextContainer.pack(pady=(20, 0))
 
-        self.cpfText = Label(self.cpfTextContainer, text="Insira seu RG")
+        self.cpfText = Label(self.cpfTextContainer, text="Insira seu CPF")
         self.cpfText["font"] = ("Verdana", "10", "bold")
         self.cpfText.pack(side=LEFT, pady = (0, 5))
 
@@ -169,7 +169,7 @@ class RegisterApplication(MainApplication) :
         self.rgTextContainer["height"] = 15
         self.rgTextContainer.pack(pady=(20, 0))
 
-        self.rgText = Label(self.rgTextContainer, text="Insira seu CPF")
+        self.rgText = Label(self.rgTextContainer, text="Insira seu RG")
         self.rgText["font"] = ("Verdana", "10", "bold")
         self.rgText.pack(side=LEFT, pady = (0, 5))
 
@@ -364,7 +364,7 @@ class DepositApplication(BankApplication):
             try:
                 # Converte as vírgulas em pontos
                 value = self.depositValueEntry.get().replace(',', '.')
-                
+
                 account.deposit(int(float(value)*100))
                 self.depositBody.pack_forget()
                 ShowBalance.__init__(ShowBalance, account)
@@ -419,6 +419,8 @@ class WithdrawApplication(BankApplication):
                 account.withdraw(int(float(value)*100))
                 self.withdrawBody.pack_forget()
                 ShowBalance.__init__(ShowBalance, account)
+            except Warning as e:
+                messagebox.showwarning("Erro", "Saldo insuficiente")
             except Exception as e:
                 # Caso o input não seja um número ou esteja vazio, captura um erro
                 messagebox.showwarning("Erro", "Favor inserir um número válido")
@@ -466,17 +468,22 @@ class TransferApplication(BankApplication):
         # Função ativada ao clicar no botão de transferência
         def update(event):
             try:
-                # Tentativa de converter os inputs em números. Caso não sejam números, um erro será capturado
-                accNumber = int(self.accNumEntry.get())
-                agency = int(self.agencyEntry.get())
+                if self.accNumEntry.get()=="" or self.agencyEntry.get()=="" or self.transferValueEntry.get()=="":
+                    messagebox.showwarning("Erro", "Por favor preencha todos os campos")
+                else:
+                    # Tentativa de converter os inputs em números. Caso não sejam números, um erro será capturado
+                    accNumber = int(self.accNumEntry.get())
+                    agency = int(self.agencyEntry.get())
 
-                # Converte as vírgulas em pontos
-                value = self.transferValueEntry.get().replace(',', '.')
-                value = int(float(value)*100)
+                    # Converte as vírgulas em pontos
+                    value = self.transferValueEntry.get().replace(',', '.')
+                    value = int(float(value)*100)
 
-                account.transfer(accNumber, agency, value)
-                self.transferBody.pack_forget()
-                ShowBalance.__init__(ShowBalance, account)
+                    account.transfer(accNumber, agency, value)
+                    self.transferBody.pack_forget()
+                    ShowBalance.__init__(ShowBalance, account)
+            except Warning:
+                messagebox.showwarning("Erro", "Saldo Insuficiente")
             except ValueError:
                 # Captura erros de input (string ou vazio onde deveria ser números)
                 messagebox.showwarning("Erro", "Favor inserir apenas números")
@@ -556,6 +563,10 @@ class ShowBalance:
         self.title = Label(self.balanceBody, text="Banco Python")
         self.title["font"] = ("Verdana", "16", "bold")
         self.title.pack()
+
+        self.subtitle = Label(self.balanceBody, text="Operação efetuada com sucesso!")
+        self.subtitle["font"] = ("Verdana", "12", "bold")
+        self.subtitle.pack(pady = (55, 0))
 
         self.subtitle = Label(self.balanceBody, text="Novo saldo:")
         self.subtitle["font"] = ("Verdana", "12", "bold")

@@ -34,7 +34,7 @@ class Account():
 
         balance = self.retrieveBalance(self.id)
         balance += value
-        print("New balance: $%.2f" % (balance/100))
+        print("Novo saldo: $%.2f" % (balance/100))
         self.updateBalance(balance)
     
     # Retira um valor na conta
@@ -45,10 +45,10 @@ class Account():
         balance = self.retrieveBalance(self.id)
 
         if value > balance:
-            raise Exception("Insufficient balance")
+            raise Warning("Saldo insuficiente")
         else:
             balance -= value
-            print("New balance: $%.2f" % (balance/100))
+            print("Novo saldo: $%.2f" % (balance/100))
         
         self.updateBalance(balance)
     
@@ -58,10 +58,10 @@ class Account():
         balance = self.retrieveBalance(self.id)
 
         if value > balance:
-            raise Exception("Insufficient balance")
+            raise Warning("Saldo insuficiente")
         else:
             balance -= value
-            print("New balance: $%.2f" % (balance/100))
+            print("Novo saldo: $%.2f" % (balance/100))
 
         self.transferToReceiver(accNumber, agency, value, balance)
 
@@ -89,11 +89,11 @@ class Account():
         except:
             # Caso o resultado seja nulo (a conta não existe), cria um erro a ser tratado 
             # na função dbUpdate
-            raise Exception("Account does not exist")
+            raise Exception("Conta não existe")
         
     def testResult(self, result):
         if result is None:
-            raise Exception("Credentials are incorrect")
+            raise Exception("Credenciais estão incorretas")
         else:
             return result
     

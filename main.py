@@ -46,7 +46,7 @@ def checkEmail(email):
         conn.commit()
     # Validação do e-mail, tanto relacionada à sintaxe quanto à unicidade
     if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email) is None: 
-        raise Exception("O E-mail não é válido")
+        raise Exception("E-mail inválido")
     if result.scalar() is not None: 
         raise Exception("E-mail já está em uso")
 
@@ -70,7 +70,7 @@ def createNewAccount(holder):
 # Testa se o retorno do banco de dados é nulo, e retorna um erro caso for
 def testResult(result):
     if result is None:
-        raise Exception("Credentials are incorrect")
+        raise Exception("Credenciais estão incorretas")
     else:
         return result
 
@@ -91,7 +91,7 @@ def authenticate(email, password):
         return accessClient(email)
     else:
         # Gera um erro caso algo as senhas sejam diferentes
-        raise Exception("Credentials are incorrect")
+        raise Exception("Credenciais estão incorretas")
 
 
 # Confere a unicidade do ID gerado
