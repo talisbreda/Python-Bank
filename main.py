@@ -1,4 +1,5 @@
 # Imports de classe
+from pickle import FALSE
 from account import Account
 from client import Client
 
@@ -23,18 +24,22 @@ def createNewClient(name, email, phone, cpf, rg, password):
     id = checkId(id, "client")
     # Verifica se o email inserido é válido ou se já está registrado
     checkEmail(email)
+    valid = checkCPF(cpf)
     
+    if valid:
     # Cria uma conexão para inserir uma nova linha na tabela de clientes do banco de dados
-    with engine.connect() as conn:
-        conn.execute(
-            text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
-            [{"id": id, "passcode": passcode, "fullname": name, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
-        )
-        conn.commit()
-    # Instancia uma classe com os dados do cliente
-    client = Client(id, name, email, phone, cpf, rg, True)
-    # Acessa os serviços bancários na conta recém registrada
-    return bank(client)
+        with engine.connect() as conn:
+            conn.execute(
+                text("INSERT INTO client (idClient, passcode, fullname, email, phone, cpf, rg) VALUES (:id, :passcode, :fullname, :email, :phone, :cpf, :rg)"),
+                [{"id": id, "passcode": passcode, "fullname": name, "email": email, "phone": phone, "cpf": cpf, "rg": rg}]
+            )
+            conn.commit()
+        # Instancia uma classe com os dados do cliente
+        client = Client(id, name, email, phone, cpf, rg, True)
+        # Acessa os serviços bancários na conta recém registrada
+        return bank(client)
+    else:
+        raise Exception("CPF é inválido")
 
 # Checa a validade do e-mail e a sua existência no banco de dados
 def checkEmail(email):
@@ -49,6 +54,33 @@ def checkEmail(email):
         raise Exception("E-mail inválido")
     if result.scalar() is not None: 
         raise Exception("E-mail já está em uso")
+
+def checkCPF(cpf):
+
+    count = 2
+    def checkDigit(digit):
+        sum = 0
+        for i in range (n-count):
+            sum += int(str(cpf)[i]) * ((n-count+1)-i)
+        if sum % 11 < 2 and int(digit) == 0:
+            return True
+        elif sum % 11 >= 2 and int(digit) == 11 - sum % 11:
+            return True
+        else:
+            return False
+
+    n = len(str(cpf))
+    if n != 11:
+        return False
+    if cpf == cpf[::-1]:
+        return False
+    valid = checkDigit(str(cpf)[9])
+    count = 1
+    if valid: valid = checkDigit(str(cpf)[10])
+
+    if valid: return True
+    else: return False
+    
 
 # Cria uma nova conta no banco de dados
 def createNewAccount(holder):

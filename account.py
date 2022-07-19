@@ -63,9 +63,8 @@ class Account():
             balance -= value
             print("Novo saldo: $%.2f" % (balance/100))
 
-        self.transferToReceiver(accNumber, agency, value, balance)
-
         self.updateBalance(balance)
+        self.transferToReceiver(accNumber, agency, value, balance)
     
     # Função responsável por atualizar os dados da conta receptora de uma transferência
     def transferToReceiver(self, accNumber, agency, value, balance):
